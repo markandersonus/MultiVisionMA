@@ -22,20 +22,36 @@ app.use(stylus.middleware(
     compile: compile
   }
 ));
+// Any requests coming into public will be served up as static files
 app.use(express.static(__dirname + '/public'));
 
 mongoose.connect('mongodb://localhost/multivision');
 var db = mongoose.connection;
+// Listen for errors and log
 db.on('error', console.error.bind(console, 'connection error...'));
+// Listen for open ONCE and log
 db.once('open', function callback() {
   console.log('multivision db opened');
 });
+
+// Create schema for collection of messages
 var messageSchema = mongoose.Schema({message: String});
+// Create model based on schema
 var Message = mongoose.model('Message', messageSchema);
+// Create variable to hold date from DB
 var mongoMessage;
+// Find first doc in collection (as no param passed to find(). Callback sets variable to error or message doc
 Message.findOne().exec(function(err, messageDoc) {
   mongoMessage = messageDoc.message;
 });
+
+// need to add message collection using shell commands
+/*
+    mongo
+    use multivision
+    db.messages.insert({message: 'Hello Mongo'})     // will create the db and collection
+    show collections
+ */
 
 app.get('/partials/:partialPath', function(req, res) {
     res.render('partials/' + req.params.partialPath);
