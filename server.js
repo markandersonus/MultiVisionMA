@@ -25,7 +25,14 @@ app.use(stylus.middleware(
 // Any requests coming into public will be served up as static files
 app.use(express.static(__dirname + '/public'));
 
-mongoose.connect('mongodb://localhost/multivision');
+if (env === 'development') {
+    mongoose.connect('mongodb://localhost/multivision');
+} else{
+    mongoose.connect('mongodb://markandersonus:multivision@ds053597.mongolab.com:53597/multivision');
+}
+
+
+
 var db = mongoose.connection;
 // Listen for errors and log
 db.on('error', console.error.bind(console, 'connection error...'));
@@ -45,12 +52,20 @@ Message.findOne().exec(function(err, messageDoc) {
   mongoMessage = messageDoc.message;
 });
 
-// need to add message collection using shell commands
+// need to add message to local collection using shell commands
 /*
     mongo
     use multivision
     db.messages.insert({message: 'Hello Mongo'})     // will create the db and collection
     show collections
+ */
+
+// need to add message to MongoLab collection using shell commands
+/*
+ mongo ds053597.mongolab.com:53597/multivision -u markandersonus -p multivision
+ use multivision
+ db.messages.insert({message: 'Hello Mongo'})     // will create the db and collection
+ show collections
  */
 
 app.get('/partials/:partialPath', function(req, res) {
@@ -63,6 +78,6 @@ app.get('*', function(req, res) {
   });
 });
 
-var port = 3030;
+var port = process.env.PORT || 3030;
 app.listen(port);
 console.log('Listening on port ' + port + '...');
